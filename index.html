@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineStream - Frontend</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #f5c518;
+      margin-bottom: 1.5rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .card h2 {
+      margin-bottom: 1rem;
+      color: #f5c518;
+      border-bottom: 2px solid #333;
+      padding-bottom: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+    th {
+      background: #2a2a2a;
+      color: #f5c518;
+    }
+    tr:hover {
+      background: #2a2a2a;
+    }
+    button {
+      background: #f5c518;
+      color: #000;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #d4a800;
+    }
+    button.danger {
+      background: #d32f2f;
+      color: white;
+    }
+    button.danger:hover {
+      background: #b71c1c;
+    }
+    button.small {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.85rem;
+    }
+    .form-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    input, select {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #fff;
+      flex: 1;
+      min-width: 120px;
+    }
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .message {
+      background: #2e7d32;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 CineStream</h1>
+
+    <!-- SEÇÃO FILMES -->
+    <div class="card">
+      <div class="flex-between">
+        <h2>Filmes</h2>
+        <button onclick="mostrarFormFilme()">+ Novo Filme</button>
+      </div>
+      <div id="form-filme" style="display:none; margin-top:1rem;">
+        <div class="form-row">
+          <input type="text" id="filme-titulo" placeholder="Título">
+          <input type="text" id="filme-genero" placeholder="Gênero">
+          <input type="number" id="filme-ano" placeholder="Ano">
+          <button id="btn-salvar-filme" onclick="salvarFilme()">Salvar</button>
+          <button class="danger" onclick="cancelarFormFilme()">Cancelar</button>
+        </div>
+        <input type="hidden" id="filme-id-edit">
+      </div>
+      <table id="tabela-filmes">
+        <thead><tr><th>ID</th><th>Título</th><th>Gênero</th><th>Ano</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- SEÇÃO USUÁRIOS -->
+    <div class="card">
+      <div class="flex-between">
+        <h2>Usuários</h2>
+        <button onclick="mostrarFormUsuario()">+ Novo Usuário</button>
+      </div>
+      <div id="form-usuario" style="display:none; margin-top:1rem;">
+        <div class="form-row">
+          <input type="text" id="usuario-nome" placeholder="Nome">
+          <input type="email" id="usuario-email" placeholder="Email">
+          <select id="usuario-plano">
+            <option value="Básico">Básico</option>
+            <option value="Premium">Premium</option>
+          </select>
+          <button id="btn-salvar-usuario" onclick="salvarUsuario()">Salvar</button>
+          <button class="danger" onclick="cancelarFormUsuario()">Cancelar</button>
+        </div>
+        <input type="hidden" id="usuario-id-edit">
+      </div>
+      <table id="tabela-usuarios">
+        <thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Plano</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- SEÇÃO FAVORITOS -->
+    <div class="card">
+      <h2>Favoritos</h2>
+      <div class="form-row">
+        <select id="fav-usuario">
+          <option value="">Selecione usuário</option>
+        </select>
+        <select id="fav-filme">
+          <option value="">Selecione filme</option>
+        </select>
+        <button onclick="adicionarFavorito()">⭐ Favoritar</button>
+      </div>
+      <div class="form-row">
+        <input type="number" id="fav-usuario-id" placeholder="ID do usuário para filtrar">
+        <button onclick="listarFavoritosPorUsuario()">🔍 Filtrar por Usuário</button>
+        <button onclick="listarFavoritos()">🔄 Listar Todos</button>
+      </div>
+      <div id="favoritos-lista"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+
+    // ========== UTILITÁRIOS ==========
+    async function fetchAPI(url, options = {}) {
+      const res = await fetch(`${API}${url}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+      });
+      return await res.json();
+    }
+
+    function atualizarTabelaFilmes() {
+      fetchAPI('/filmes').then(filmes => {
+        const tbody = document.querySelector('#tabela-filmes tbody');
+        tbody.innerHTML = filmes.map(f => `
+          <tr>
+            <td>${f.id}</td>
+            <td>${f.titulo}</td>
+            <td>${f.genero}</td>
+            <td>${f.ano_lancamento}</td>
+            <td>
+              <button class="small" onclick="editarFilme(${f.id})">Editar</button>
+              <button class="small danger" onclick="excluirFilme(${f.id})">Excluir</button>
+            </td>
+          </tr>
+        `).join('');
+      });
+    }
+
+    function atualizarTabelaUsuarios() {
+      fetchAPI('/usuarios').then(usuarios => {
+        const tbody = document.querySelector('#tabela-usuarios tbody');
+        tbody.innerHTML = usuarios.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.nome}</td>
+            <td>${u.email}</td>
+            <td>${u.plano}</td>
+            <td>
+              <button class="small" onclick="editarUsuario(${u.id})">Editar</button>
+            </td>
+          </tr>
+        `).join('');
+        // Atualizar select de favoritos
+        const selUsuario = document.getElementById('fav-usuario');
+        selUsuario.innerHTML = '<option value="">Selecione usuário</option>' + 
+          usuarios.map(u => `<option value="${u.id}">${u.nome} (ID ${u.id})</option>`).join('');
+      });
+    }
+
+    function atualizarSelectFilmes() {
+      fetchAPI('/filmes').then(filmes => {
+        const selFilme = document.getElementById('fav-filme');
+        selFilme.innerHTML = '<option value="">Selecione filme</option>' + 
+          filmes.map(f => `<option value="${f.id}">${f.titulo} (ID ${f.id})</option>`).join('');
+      });
+    }
+
+    function listarFavoritos() {
+      fetchAPI('/favoritos').then(favs => {
+        const div = document.getElementById('favoritos-lista');
+        if (!favs.length) {
+          div.innerHTML = '<p>Nenhum favorito encontrado.</p>';
+          return;
+        }
+        let html = '<table><thead><tr><th>ID Fav</th><th>Usuário</th><th>Filme</th><th>Ações</th></tr></thead><tbody>';
+        favs.forEach(f => {
+          html += `<tr>
+            <td>${f.id}</td>
+            <td>${f.usuario ? f.usuario.nome : 'N/A'}</td>
+            <td>${f.filme ? f.filme.titulo : 'N/A'}</td>
+            <td><button class="small danger" onclick="removerFavorito(${f.id})">Remover</button></td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        div.innerHTML = html;
+      });
+    }
+
+    function listarFavoritosPorUsuario() {
+      const idUsuario = document.getElementById('fav-usuario-id').value;
+      if (!idUsuario) return alert('Informe o ID do usuário');
+      fetchAPI(`/favoritos/usuario/${idUsuario}`).then(filmes => {
+        const div = document.getElementById('favoritos-lista');
+        if (!filmes.length) {
+          div.innerHTML = '<p>Nenhum favorito para este usuário.</p>';
+          return;
+        }
+        let html = '<h3>Filmes favoritos do usuário</h3><ul>';
+        filmes.forEach(f => html += `<li>${f.titulo} (${f.ano_lancamento})</li>`);
+        html += '</ul>';
+        div.innerHTML = html;
+      });
+    }
+
+    // ========== FILMES CRUD ==========
+    function mostrarFormFilme() {
+      document.getElementById('form-filme').style.display = 'block';
+      document.getElementById('filme-id-edit').value = '';
+      document.getElementById('filme-titulo').value = '';
+      document.getElementById('filme-genero').value = '';
+      document.getElementById('filme-ano').value = '';
+      document.getElementById('btn-salvar-filme').textContent = 'Salvar';
+    }
+
+    function cancelarFormFilme() {
+      document.getElementById('form-filme').style.display = 'none';
+    }
+
+    function salvarFilme() {
+      const idEdit = document.getElementById('filme-id-edit').value;
+      const titulo = document.getElementById('filme-titulo').value;
+      const genero = document.getElementById('filme-genero').value;
+      const ano = document.getElementById('filme-ano').value;
+      const body = { titulo, genero, ano_lancamento: ano ? parseInt(ano) : null };
+
+      if (idEdit) {
+        fetchAPI(`/filmes/${idEdit}`, { method: 'PUT', body: JSON.stringify(body) })
+          .then(() => {
+            cancelarFormFilme();
+            atualizarTabelaFilmes();
+            atualizarSelectFilmes();
+          });
+      } else {
+        fetchAPI('/filmes', { method: 'POST', body: JSON.stringify(body) })
+          .then(() => {
+            cancelarFormFilme();
+            atualizarTabelaFilmes();
+            atualizarSelectFilmes();
+          });
+      }
+    }
+
+    function editarFilme(id) {
+      fetchAPI('/filmes').then(filmes => {
+        const filme = filmes.find(f => f.id === id);
+        if (!filme) return;
+        document.getElementById('form-filme').style.display = 'block';
+        document.getElementById('filme-id-edit').value = filme.id;
+        document.getElementById('filme-titulo').value = filme.titulo;
+        document.getElementById('filme-genero').value = filme.genero;
+        document.getElementById('filme-ano').value = filme.ano_lancamento;
+        document.getElementById('btn-salvar-filme').textContent = 'Atualizar';
+      });
+    }
+
+    function excluirFilme(id) {
+      if (confirm('Tem certeza que deseja excluir este filme? Também removerá dos favoritos.')) {
+        fetchAPI(`/filmes/${id}`, { method: 'DELETE' })
+          .then(() => {
+            atualizarTabelaFilmes();
+            atualizarSelectFilmes();
+            listarFavoritos();
+          });
+      }
+    }
+
+    // ========== USUÁRIOS CRUD ==========
+    function mostrarFormUsuario() {
+      document.getElementById('form-usuario').style.display = 'block';
+      document.getElementById('usuario-id-edit').value = '';
+      document.getElementById('usuario-nome').value = '';
+      document.getElementById('usuario-email').value = '';
+      document.getElementById('usuario-plano').value = 'Básico';
+      document.getElementById('btn-salvar-usuario').textContent = 'Salvar';
+    }
+
+    function cancelarFormUsuario() {
+      document.getElementById('form-usuario').style.display = 'none';
+    }
+
+    function salvarUsuario() {
+      const idEdit = document.getElementById('usuario-id-edit').value;
+      const nome = document.getElementById('usuario-nome').value;
+      const email = document.getElementById('usuario-email').value;
+      const plano = document.getElementById('usuario-plano').value;
+      const body = { nome, email, plano };
+
+      if (idEdit) {
+        fetchAPI(`/usuarios/${idEdit}`, { method: 'PUT', body: JSON.stringify(body) })
+          .then(() => {
+            cancelarFormUsuario();
+            atualizarTabelaUsuarios();
+          });
+      } else {
+        fetchAPI('/usuarios', { method: 'POST', body: JSON.stringify(body) })
+          .then(() => {
+            cancelarFormUsuario();
+            atualizarTabelaUsuarios();
+          });
+      }
+    }
+
+    function editarUsuario(id) {
+      fetchAPI('/usuarios').then(usuarios => {
+        const usuario = usuarios.find(u => u.id === id);
+        if (!usuario) return;
+        document.getElementById('form-usuario').style.display = 'block';
+        document.getElementById('usuario-id-edit').value = usuario.id;
+        document.getElementById('usuario-nome').value = usuario.nome;
+        document.getElementById('usuario-email').value = usuario.email;
+        document.getElementById('usuario-plano').value = usuario.plano;
+        document.getElementById('btn-salvar-usuario').textContent = 'Atualizar';
+      });
+    }
+
+    // ========== FAVORITOS ==========
+    function adicionarFavorito() {
+      const id_usuario = document.getElementById('fav-usuario').value;
+      const id_filme = document.getElementById('fav-filme').value;
+      if (!id_usuario || !id_filme) return alert('Selecione usuário e filme');
+      fetchAPI('/favoritos', { 
+        method: 'POST', 
+        body: JSON.stringify({ id_usuario: parseInt(id_usuario), id_filme: parseInt(id_filme) }) 
+      }).then(() => {
+        listarFavoritos();
+      });
+    }
+
+    function removerFavorito(id) {
+      if (confirm('Remover este favorito?')) {
+        fetchAPI(`/favoritos/${id}`, { method: 'DELETE' })
+          .then(() => listarFavoritos());
+      }
+    }
+
+    // Inicialização
+    window.onload = () => {
+      atualizarTabelaFilmes();
+      atualizarTabelaUsuarios();
+      atualizarSelectFilmes();
+      listarFavoritos();
+    };
+  </script>
+</body>
+</html>
